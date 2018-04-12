@@ -255,6 +255,8 @@ public class LiveAuthClient {
         this.session = new LiveConnectSession(this);
     }
 
+    private AuthorizationRequest.CancellationTrigger cancellationTrigger;
+
     /**
      * Constructs a new {@code LiveAuthClient} instance and initializes its member variables.
      *
@@ -412,6 +414,7 @@ public class LiveAuthClient {
         });
 
         this.hasPendingLoginRequest = true;
+        this.cancellationTrigger = request.getCancellationTrigger();
 
         request.execute();
     }
@@ -541,6 +544,15 @@ public class LiveAuthClient {
 
         cookieSyncManager.sync();
         listener.onAuthComplete(LiveStatus.UNKNOWN, null, userState);
+    }
+
+    /**
+     * Cancel a login attempt in progress.
+     */
+    public void cancelLogin() {
+        if (cancellationTrigger != null && this.hasPendingLoginRequest) {
+            cancellationTrigger.cancel();
+        }
     }
 
     /** @return The {@link HttpClient} instance used by this {@code LiveAuthClient}. */

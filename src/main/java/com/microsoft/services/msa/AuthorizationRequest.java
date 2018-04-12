@@ -296,6 +296,13 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
     private final String scope;
     private final String loginHint;
     private final OAuthConfig mOAuthConfig;
+    private OAuthDialog oAuthDialog;
+
+    public class CancellationTrigger {
+        final void cancel() {
+            AuthorizationRequest.this.cancel();
+        }
+    }
 
     public AuthorizationRequest(Activity activity,
                                 HttpClient client,
@@ -315,6 +322,10 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
         this.observable = new DefaultObservableOAuthRequest();
         this.scope = scope;
         this.loginHint = loginHint;
+    }
+
+    public CancellationTrigger getCancellationTrigger() {
+        return new CancellationTrigger();
     }
 
     @Override
@@ -346,8 +357,17 @@ class AuthorizationRequest implements ObservableOAuthRequest, OAuthRequestObserv
 
         Uri requestUri = requestUriBuilder.build();
 
-        OAuthDialog oAuthDialog = new OAuthDialog(requestUri);
+        oAuthDialog = new OAuthDialog(requestUri);
         oAuthDialog.show();
+    }
+
+    /**
+     * Dismisses the auth dialog.
+     * Calls the passed-in listener when completed.
+     */
+    private void cancel() {
+        if (oAuthDialog != null)
+            oAuthDialog.dismiss();
     }
 
     @Override
